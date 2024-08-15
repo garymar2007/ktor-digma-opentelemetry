@@ -13,6 +13,8 @@ import it.skrape.fetcher.response
 import it.skrape.fetcher.skrape
 import it.skrape.selects.html5.div
 import it.skrape.selects.html5.span
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import pl.jutupe.ktor_rabbitmq.consume
 import pl.jutupe.ktor_rabbitmq.rabbitConsumer
 
@@ -20,10 +22,11 @@ fun Application.configureScapeConsumer(scrapeLogic: ScrapeLogic) {
     rabbitConsumer {
         consume<ScrapeRequest>("queue") { scrapeRequest ->
 
-            val website = createOrGetWebsite(scrapeRequest)
-            val price = scrapeEbayPrice(scrapeRequest.url)
-            savePriceRecord(website, price)
-
+            GlobalScope.launch {
+                val website = createOrGetWebsite(scrapeRequest)
+                val price = scrapeEbayPrice(scrapeRequest.url)
+                savePriceRecord(website, price)
+            }
         }
     }
 }

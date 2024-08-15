@@ -10,7 +10,7 @@ import it.skrape.selects.html5.span
 import io.opentelemetry.instrumentation.annotations.WithSpan
 
 @WithSpan
-fun scrapeEbayPrice(urlToScrap: String): Int {
+suspend fun scrapeEbayPrice(urlToScrap: String): Int {
 
     var price = skrape(HttpFetcher){
 
@@ -18,6 +18,12 @@ fun scrapeEbayPrice(urlToScrap: String): Int {
             this.url = urlToScrap
         }
 
+        /**
+         * In order to get the price from the html document, we need to find the following structure:
+         * <div class="x-price-primary" data-testid="x-price-primary">
+         *     <span class="ux-textspans">US $44.95/ea</span>
+         * </div>
+         */
         response {
             htmlDocument {
                 div {

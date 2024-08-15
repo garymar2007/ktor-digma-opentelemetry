@@ -1,27 +1,27 @@
 package com.gary.controllers
 
 import com.gary.consumers.ScrapeLogic
+import com.gary.domain.createOrGetWebsite
 import com.gary.domain.ridiculouslySimplePriceFormatter
+import com.gary.domain.savePriceRecord
+import com.gary.domain.scrapeEbayPrice
 import com.gary.dtos.PriceRecordDto
 import com.gary.dtos.ScrapeRequest
 import com.gary.plugins.PriceRecord
 import com.gary.plugins.PriceRecords
 import com.gary.plugins.Website
 import com.gary.plugins.Websites
-import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.*
-import org.jetbrains.exposed.sql.SizedIterable
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SortOrder.DESC
-import org.jetbrains.exposed.sql.max
 import org.jetbrains.exposed.sql.transactions.transaction
-import pl.jutupe.ktor_rabbitmq.publish
 
 fun Application.configurePriceController(scrapeLogic: ScrapeLogic) {
     routing {
@@ -133,17 +133,19 @@ fun Application.configurePriceController(scrapeLogic: ScrapeLogic) {
         }
 
         post("/scrape") {
-//            var scrapeRequest =call.receive<ScrapeRequest>();
+            var scrapeRequest =call.receive<ScrapeRequest>();
+
+            val urlWebsite = createOrGetWebsite(scrapeRequest)
+
+            GlobalScope.launch {
+                var price = scrapeEbayPrice(scrapeRequest.url)
+                savePriceRecord(urlWebsite, price)
+            }
 //
-//            val urlWebsite = createOrGetWebsite(scrapeRequest)
-//
-//            var price = scrapeEbayPrice(scrapeRequest.url)
-//            savePriceRecord(urlWebsite, price)
 //
 //
-//
-            var scrapeRequest = call.receive<ScrapeRequest>();
-            call.publish("exchange", "routingKey", null, scrapeRequest)
+//            var scrapeRequest = call.receive<ScrapeRequest>();
+//            call.publish("exchange", "routingKey", null, scrapeRequest)
 
             call.respond(HttpStatusCode.OK)
         }
