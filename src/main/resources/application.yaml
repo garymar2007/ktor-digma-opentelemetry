@@ -1,0 +1,21 @@
+ktor:
+  application:
+    modules:
+      - com.gary.ApplicationKt.module
+  deployment:
+    port: 8089
+
+  environment: "$ENV:staging"
+
+  database:
+    dev:
+      url: 'jdbc:postgresql://localhost:5433/webprice_dev'
+      user: 'webprice'
+      password: 'webprice'
+      driver: 'org.postgresql.Driver'
+
+    staging:
+      url: 'jdbc:postgresql://localhost:5433/webprice'
+      user: 'webprice'
+      password: 'webprice'
+      driver: 'org.postgresql.Driver'
